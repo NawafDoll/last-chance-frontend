@@ -6,12 +6,13 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 
-function PurchaseConfirm({ boo, open, onClose }: any) {
+function LoadingProcess({ boo, onClose }: any) {
   const { onOpen } = useDisclosure();
 
   const OverlayOne = () => (
@@ -20,7 +21,6 @@ function PurchaseConfirm({ boo, open, onClose }: any) {
       backdropFilter="blur(10px) hue-rotate(90deg)"
     />
   );
-
   const [overlay, setOverlay] = useState(<OverlayOne />);
   return (
     <>
@@ -32,15 +32,23 @@ function PurchaseConfirm({ boo, open, onClose }: any) {
         closeOnOverlayClick={onClose}
       >
         {overlay}
-        <ModalContent>
-          <ModalHeader textAlign={"center"}>
-            <CheckCircleIcon w={12} h={12} color="green" />
-          </ModalHeader>
-          <ModalCloseButton />
+        <ModalContent bg={"transparent"} border={""}>
           <ModalBody textAlign={"center"}>
-            <Text fontSize={"3xl"}>
-              تم شراء التذكرة بنجاح سيتم ارسالها على ايميلك و ستكون معروضة في
-              صفحتي
+            <Spinner
+              color="white"
+              fontSize={"5xl"}
+              fontWeight={"bold"}
+              w={"100px"}
+              h={"100px"}
+            />
+            <Text
+              color={"white"}
+              fontSize={"2xl"}
+              mt={"5px"}
+              fontWeight={"bold"}
+            >
+              {" "}
+              ...جاري تنفيذ الدفع
             </Text>
           </ModalBody>
         </ModalContent>
@@ -49,4 +57,4 @@ function PurchaseConfirm({ boo, open, onClose }: any) {
   );
 }
 
-export default PurchaseConfirm;
+export default LoadingProcess;

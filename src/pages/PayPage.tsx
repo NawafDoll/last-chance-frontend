@@ -20,6 +20,9 @@ import { FUNDING, PayPalButtons } from "@paypal/react-paypal-js";
 import { UserContext } from "../components/ContextUser";
 import { CalendarIcon } from "@chakra-ui/icons";
 import PurchaseConfirm from "../components/PurchaseConfirm";
+import DropIn, { IDropInProps } from "braintree-web-drop-in-react";
+import useBraintreeDropin from "braintree-web-drop-in-react";
+import LoadingProcess from "../components/LoadingProcess";
 interface dataEvent {
   _id: string;
   eventName: string;
@@ -30,6 +33,10 @@ interface dataEvent {
   placeEvent: string;
   imageSeats: string;
 }
+interface CustomBraintreeHooks {
+  create: any; // استبدل "any" بنوع القيمة المتوقعة لـ "create"
+  paypal: any; // استبدل "any" بنوع القيمة المتوقعة لـ "paypal"
+}
 interface dataTicket {
   _id: string;
   price: any;
@@ -37,10 +44,12 @@ interface dataTicket {
   seat: string;
   user_id: string;
   event_id: string;
+  isSold: boolean;
 }
 function PayPage() {
   const { userInfo } = UserContext();
   const { _id } = useParams();
+  const [loading, setLoading] = useState(false);
   const [infoTicket, setInfoTicket] = useState<dataTicket>({
     _id: "",
     price: "",
@@ -48,6 +57,7 @@ function PayPage() {
     seat: "",
     user_id: "",
     event_id: "",
+    isSold: false,
   });
   const [infoEvent, setInfoEvent] = useState<dataEvent>({
     _id: "",
@@ -58,6 +68,11 @@ function PayPage() {
     time: 0,
     placeEvent: "",
     imageSeats: "",
+  });
+  const [values, setValues] = useState<any>({
+    clientToken: null,
+    success: "",
+    error: "",
   });
   const [user, setUser] = useState();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -81,6 +96,17 @@ function PayPage() {
       })
       .catch((err) => {
         console.log(err);
+
+        localStorage.clear();
+        toast({
+          colorScheme: "pink",
+          position: "top",
+          title: "يجب عليك اعادة تسجيل الدخول ",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return navigate("/login");
       });
   }, [_id]);
 
@@ -94,103 +120,146 @@ function PayPage() {
         console.log(err);
       });
   }, [infoTicket.event_id]);
-  const createOrder = (data: any) => {
-    // Order is created on the server and the order id is returned
-    return fetch(`http://localhost:3336/order/createOrder/${_id}`, {
-      method: "POST",
+
+  const getToken = () => {
+    return fetch(`http://localhost:3336/order/generate/token`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         authorization: "Bearer " + localStorage.getItem("token"),
       },
-      // use the "body" param to optionally pass additional order information
-      // like product skus and quantities
-      body: JSON.stringify({
-        product: {
-          price: infoTicket.price,
-        },
-      }),
     })
-      .then((response) => {
-        if (response.status === 400 && response.status < 500) {
+      .then((res: any) => {
+        //
+        return res.json();
+      })
+      .catch((err) => {
+        console.log(err);
+        localStorage.clear();
+        toast({
+          colorScheme: "pink",
+          position: "top",
+          title: "يجب عليك اعادة تسجيل الدخول ",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return navigate("/login");
+      });
+  };
+
+  useEffect(() => {
+    getToken()
+      .then((res) => setValues({ ...values, clientToken: res.clientToken }))
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  // console.log(values);
+  // useEffect(() => {
+  //   if (values.) {
+  //   }
+  // }, []);
+
+  function makePayment(data: any) {
+    return fetch(`http://localhost:3336/order/payment/${_id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => {
+        console.log(res.status);
+        if (
+          (res.status >= 400 && res.status < 500) ||
+          infoTicket.isSold === true
+        ) {
           return toast({
             title: "نعتذر منك تم شراء التذكرة من قبل مستخدم اخر",
             status: "warning",
-            position: "bottom",
+            duration: 3000,
+            position: "top",
+
             colorScheme: "pink",
             isClosable: true,
           });
+        } else {
+          return res.json();
         }
-        return response.json();
       })
-      .then((order: any) => order.id)
       .catch((err) => {
-        console.log(err);
-        toast({
-          title: "حدث الصفحة او قم بأعادة تسجيل الدخول",
-          status: "warning",
-          position: "bottom-left",
-          colorScheme: "pink",
-          isClosable: true,
-        });
+        setLoading(false);
+        // console.log(err);
       });
-  };
-  const onApprove = async (data: any) => {
-    // Order is captured on the server and the response is returned to the browser
-    try {
-      const response = await fetch(
-        `http://localhost:3336/order/captuerOrder/${_id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            authorization: "Bearer " + localStorage.getItem("token"),
-          },
-          body: JSON.stringify({
-            orderID: data.orderID,
-            price: infoTicket.price,
-            ticket_id: infoTicket._id,
-            userBuy_id: userInfo.id,
-            userSell_id: infoTicket.user_id,
-            category: infoTicket.category,
-            seat: infoTicket.seat,
-          }),
-        }
-      );
-      if (response.status >= 400 && response.status < 500) {
-        window.close();
-        // return alert("للأسف تم شراء التذكرة من قبل مستخ");
-        toast({
-          title: "نعتذر منك تم شراء التذكرة من قبل مستخدم اخر",
-          status: "warning",
-          position: "bottom",
-          colorScheme: "pink",
-          isClosable: true,
-        });
-      }
-      await axios.put(`http://localhost:3336/ticket/purchase/${_id}`);
+  }
 
-      onOpen();
-      setTimeout(() => {
-        onClose();
-      }, 5000);
-
-      return await response.json();
-    } catch (err) {
-      toast({
-        title: "حدث الصفحة او قم بأعادة تسجيل الدخول",
+  const onPurchase = () => {
+    if (infoTicket.isSold === true) {
+      return toast({
+        title: "نعتذر منك تم شراء التذكرة من قبل مستخدم اخر",
         status: "warning",
-        position: "bottom-left",
+        duration: 3000,
+        position: "top",
         colorScheme: "pink",
         isClosable: true,
       });
     }
-  };
-  const onError = (error: any) => {
-    // عرض الخطأ الذي حدث
-    console.log(error);
-    window.close();
-  };
+    setLoading(true);
+    return values.instance
+      .requestPaymentMethod()
+      .then((data: any) => {
+        let nonce = data.nonce;
+        let paymentData = {
+          payment_method_nonce: nonce,
+          userBuy_id: userInfo.id,
+          orderID: nonce,
+        };
 
+        makePayment(paymentData)
+          .then(async (res: any) => {
+            await axios.put(`http://localhost:3336/ticket/purchase/${_id}`);
+            setLoading(false);
+
+            if (res.err) {
+              console.log(res);
+              setLoading(false);
+              setValues({ ...values, error: res.err });
+            } else if (res.success) {
+              setValues({
+                ...values,
+                error: "",
+                success: res.success,
+              });
+
+              onOpen();
+              setTimeout(() => {
+                onClose();
+              }, 5000);
+            }
+          })
+          .catch((err) => {
+            setLoading(false);
+            setValues({ ...values, error: err, success: "" });
+          });
+      })
+      .catch((err: any) => {
+        setLoading(false);
+        toast({
+          title: "الرجاء تعبئة حقول البطاقة و التأكد من معلومات البطاقة",
+          status: "warning",
+          duration: 3000,
+          position: "top",
+          colorScheme: "pink",
+          isClosable: true,
+        });
+        console.log(err);
+      });
+  };
+  // console.log(values);
   return (
     <Box backgroundColor={"#12132c"} color={"lavender"} minH={"90.2vh"}>
       <Heading textAlign={"right"} padding={"10px"}>
@@ -205,7 +274,7 @@ function PayPage() {
       >
         <Box
           m={"5px"}
-          width={"500px"}
+          width={{ base: "300px", md: "500px" }}
           border={"1px"}
           borderColor={"gray"}
           borderTopLeftRadius={"3xl"}
@@ -213,6 +282,8 @@ function PayPage() {
         >
           <VStack>
             <Image
+              loading="lazy"
+              alt="picture"
               src={infoEvent.image}
               w={"full"}
               h={"300px"}
@@ -247,19 +318,22 @@ function PayPage() {
             </HStack>
           </VStack>
         </Box>
-        <Box
-          width={"500px"}
+
+        <VStack
+          width={{ base: "300px", md: "500px" }}
           borderColor={"gray"}
           borderRadius={"3xl"}
-          m={"5px"}
+          pr={"5px"}
+          // border={"1px solid"}
           display={"flex"}
           justifyContent={"canter"}
           alignItems={"center"}
         >
-          <VStack
+          <HStack
             border={"1px solid white"}
-            w={"70%"}
-            justifyContent={"center"}
+            w={"100%"}
+            padding={"10px"}
+            justifyContent={"space-around"}
             alignItems={"center"}
           >
             <HStack>
@@ -267,8 +341,8 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"right"}
                 color={"white"}
-                fontSize={"2xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
                 {infoTicket.price}
               </Text>
@@ -276,8 +350,8 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"right"}
                 color={"blue.400"}
-                fontSize={"3xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
                 :السعر
               </Text>
@@ -287,8 +361,8 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"center"}
                 color={"white"}
-                fontSize={"2xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
                 1
               </Text>
@@ -296,10 +370,10 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"center"}
                 color={"blue.400"}
-                fontSize={"3xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
-                :عدد التذاكر
+                :التذاكر
               </Text>
             </HStack>
             <HStack>
@@ -307,8 +381,8 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"center"}
                 color={"white"}
-                fontSize={"2xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
                 {infoTicket.seat}
               </Text>
@@ -316,8 +390,8 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"center"}
                 color={"blue.400"}
-                fontSize={"3xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
                 :المقعد
               </Text>
@@ -327,8 +401,8 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"center"}
                 color={"white"}
-                fontSize={"2xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
                 {infoTicket.category}
               </Text>
@@ -336,132 +410,153 @@ function PayPage() {
                 //   w={"10%"}
                 textAlign={"center"}
                 color={"blue.400"}
-                fontSize={"3xl"}
-                className="font"
+                fontSize={{ base: "sm", md: "2xl" }}
+                // className="font"
               >
                 :الفئة
               </Text>
             </HStack>
-            <Divider />
-            <PayPalButtons
-              style={{ color: "blue" }}
-              createOrder={(data: any) => createOrder(data)}
-              onApprove={(data: any) => onApprove(data)}
-              onError={onError}
-              fundingSource={FUNDING.PAYPAL}
-            />
-            {/* </HStack> */}
-          </VStack>
-        </Box>
+          </HStack>
+          <Box>
+            {!values.clientToken && <Text>Loading...</Text>}
+            {values.clientToken && (
+              <Box textAlign={"center"}>
+                <DropIn
+                  options={{
+                    authorization: values.clientToken,
+
+                    // paypal: {
+                    //   flow: "vault",
+                    // },
+                  }}
+                  onInstance={(instance) =>
+                    setValues({ ...values, instance: instance })
+                  }
+                />
+
+                <Button
+                  mt={"5px"}
+                  width={"50%"}
+                  colorScheme="blue"
+                  onClick={() => onPurchase()}
+                  textAlign={"center"}
+                >
+                  شراء
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </VStack>
       </HStack>
       <HStack
         justifyContent={"space-around"}
         alignContent={"center"}
         w={"100%"}
-      >
-        {/* <VStack w={"40%"} border={"1px solid white"} p={"10px"}>
-          <Heading textAlign={"center"}>تفاصيل الدفع</Heading>
-          <Input placeholder="name" />
-          <Input placeholder="name" />
-          <Input placeholder="name" />
-          <Input placeholder="name" />
-          <Input placeholder="name" /> */}
-        {/* <Button bg={"blue.600"} _hover={{ bg: "blue.800" }}>
-            دفع
-          </Button> */}
-        {/* </VStack> */}
-      </HStack>
+      ></HStack>
       <PurchaseConfirm boo={isOpen} onClose={onClose} />
+      {loading ? <LoadingProcess boo={true} /> : null}
     </Box>
   );
 }
 
 export default PayPage;
 
-// <Grid
-//             templateColumns="repeat(4, 1fr)"
-//             // gap={"10%"}
-//             w={"100%"}
-//             // alignContent={"space-between"}
-//             // alignItems={"self-end"}
-//             justifyContent={"space-between"}
-//           >
-//             <GridItem
-//               padding={"5px"}
-//               h="10"
-//               fontSize={{ base: "smaller", md: "lg" }}
-//             >
-//               السعر
-//             </GridItem>
-//             <GridItem
-//               h="10"
-//               padding={"5px"}
-//               fontSize={{ base: "small", md: "lg" }}
-//             >
-//               عدد التذاكر
-//             </GridItem>
-//             <GridItem
-//               padding={"5px"}
-//               h="10"
-//               fontSize={{ base: "small", md: "lg" }}
-//             >
-//               الموقع
-//             </GridItem>
-//             <GridItem
-//               padding={"5px"}
-//               h="10"
-//               fontSize={{ base: "small", md: "lg" }}
-//             >
-//               الفئة
-//             </GridItem>
-//           </Grid>
-
-// const createOrder = async (data: any) => {
-//   try {
-//     // Order is created on the server and the order id is returned
-//     const response = await fetch(
-//       "http://localhost:3336/my-server/create-paypal-order",
-//       {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         // use the "body" param to optionally pass additional order information
-//         // like product skus and quantities
-//         body: JSON.stringify({
-//           Ticket: {
-//             price: infoTicket.price,
-//             category: infoTicket.category,
-//           },
-//         }),
+function requestPaymentMethod() {
+  throw new Error("Function not implemented.");
+}
+// const createOrder = (data: any) => {
+//   // Order is created on the server and the order id is returned
+//   return fetch(`http://localhost:3336/order/createOrder/${_id}`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       authorization: "Bearer " + localStorage.getItem("token"),
+//     },
+//     // use the "body" param to optionally pass additional order information
+//     // like product skus and quantities
+//     body: JSON.stringify({
+//       product: {
+//         price: infoTicket.price,
+//       },
+//     }),
+//   })
+//     .then((response) => {
+//       if (response.status === 400 && response.status < 500) {
+//         return toast({
+//           title: "نعتذر منك تم شراء التذكرة من قبل مستخدم اخر",
+//           status: "warning",
+//           position: "bottom",
+//           colorScheme: "pink",
+//           isClosable: true,
+//         });
 //       }
-//     );
-//     const order = await response.json();
-//     console.log(order.id);
-//     return order.id;
-//   } catch (err) {
-//     console.log(err);
-//   }
+//       return response.json();
+//     })
+//     .then((order: any) => order.id)
+//     .catch((err) => {
+//       console.log(err);
+//       toast({
+//         title: "حدث الصفحة او قم بأعادة تسجيل الدخول",
+//         status: "warning",
+//         position: "bottom-left",
+//         colorScheme: "pink",
+//         isClosable: true,
+//       });
+//     });
 // };
 // const onApprove = async (data: any) => {
 //   // Order is captured on the server and the response is returned to the browser
 //   try {
 //     const response = await fetch(
-//       "http://localhost:3336/my-server/capture-paypal-order",
+//       `http://localhost:3336/order/captuerOrder/${_id}`,
 //       {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
+//           authorization: "Bearer " + localStorage.getItem("token"),
 //         },
 //         body: JSON.stringify({
 //           orderID: data.orderID,
+//           price: infoTicket.price,
+//           ticket_id: infoTicket._id,
+//           userBuy_id: userInfo.id,
+//           userSell_id: infoTicket.user_id,
+//           category: infoTicket.category,
+//           seat: infoTicket.seat,
 //         }),
 //       }
 //     );
-//     const or = await response.json();
-//     console.log(or);
-//     return or;
+//     if (response.status >= 400 && response.status < 500) {
+//       window.close();
+//       // return alert("للأسف تم شراء التذكرة من قبل مستخ");
+//       toast({
+//         title: "نعتذر منك تم شراء التذكرة من قبل مستخدم اخر",
+//         status: "warning",
+//         position: "bottom",
+//         colorScheme: "pink",
+//         isClosable: true,
+//       });
+//     }
+//     await axios.put(`http://localhost:3336/ticket/purchase/${_id}`);
+
+//     onOpen();
+//     setTimeout(() => {
+//       onClose();
+//     }, 5000);
+
+//     return await response.json();
 //   } catch (err) {
-//     console.log(err);
+//     toast({
+//       title: "حدث الصفحة او قم بأعادة تسجيل الدخول",
+//       status: "warning",
+//       position: "bottom-left",
+//       colorScheme: "pink",
+//       isClosable: true,
+//     });
 //   }
+// };
+// const onError = (error: any) => {
+//   // عرض الخطأ الذي حدث
+//   console.log(error);
+//   window.close();
 // };

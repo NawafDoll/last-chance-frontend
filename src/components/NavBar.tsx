@@ -51,13 +51,13 @@ function NavBar(props: any) {
         bg={useColorModeValue("blackAlpha.700", "gray.800")}
         color={useColorModeValue("gray.100", "white")}
         minH={"60px"}
-        py={{ base: 2 }}
-        px={{ base: 5 }}
+        // py={{ base: 2 }}
+        // px={{ base: 1 }}
         borderBottom={1}
         borderStyle={"solid"}
         borderColor={useColorModeValue("black", "gray.100")}
         align={"center"}
-        justify={"space-between"}
+        justify={"space-around"}
       >
         <Flex
           flex={{ base: 1, md: "auto" }}
@@ -87,10 +87,10 @@ function NavBar(props: any) {
         </Flex>
 
         <Flex
-          width={"470px"}
+          width={"500px"}
           justify={"space-between"}
           display={{ base: "none", md: "flex" }}
-          ml={10}
+          mr={"2px"}
         >
           <Text className="btn-22">التواصل</Text>
           <Text className="btn-22">من نحن</Text>
@@ -162,72 +162,60 @@ function NavBar(props: any) {
       </Flex>
 
       <Collapse in={isOpen} animateOpacity>
-        <Stack
-          bg={useColorModeValue("white", "gray.800")}
-          p={0}
-          display={{ md: "none" }}
+        <Box
+        // position={"relative"}
+        // zIndex={34343242343242423223233232}
+        // zIndex={3434324234324242322323}
+        // bg={useColorModeValue("white", "gray.800")}
+        // bg={"black"}
+        // p={0}
+        // display={{ md: "none" }}
+        // m={0}
         >
-          <Flex
-            py={0}
-            flexDirection={"column"}
-            justify={"space-between"}
-            align={"center"}
-            _hover={{
-              textDecoration: "none",
-            }}
-          ></Flex>
           <Link to={"/"}>
             <Text
+              textAlign={"right"}
               cursor={"pointer"}
-              p={1.5}
-              fontWeight={"medium"}
+              // p={1.5}
+              pr={"5px"}
+              pt={"5px"}
+              pb={"5px"}
+              fontWeight={"bold"}
               _hover={{ backgroundColor: "gray.200" }}
             >
-              Home
+              الرئيسية
             </Text>
           </Link>
           <hr></hr>
-          <Link to={"/orders"}>
+          <Link to={`/pageuser/${userInfo.id}`}>
             <Text
+              pr={"5px"}
+              pt={"5px"}
+              pb={"5px"}
+              textAlign={"right"}
               cursor={"pointer"}
-              p={1.5}
-              fontWeight={"medium"}
+              // p={1.5}
+              fontWeight={"bold"}
               _hover={{ backgroundColor: "gray.200" }}
             >
-              Orders
+              صفحتي
             </Text>
           </Link>
-          <hr></hr>
-          <Link to={"/card"}>
-            <Text
-              cursor={"pointer"}
-              p={1.5}
-              fontWeight={"medium"}
-              _hover={{ backgroundColor: "gray.200" }}
-            >
-              Card
-            </Text>
-          </Link>
+
           <hr></hr>
           <Text
+            pr={"5px"}
+            pt={"5px"}
+            pb={"5px"}
             cursor={"pointer"}
-            p={1.5}
-            fontWeight={"medium"}
+            textAlign={"right"}
+            fontWeight={"bold"}
             _hover={{ backgroundColor: "gray.200" }}
           >
-            About Us
+            تواصل معنا
           </Text>
           <hr></hr>
-          <Text
-            cursor={"pointer"}
-            p={1.5}
-            fontWeight={"medium"}
-            _hover={{ backgroundColor: "gray.200" }}
-          >
-            Contact
-          </Text>
-          <hr></hr>
-        </Stack>
+        </Box>
       </Collapse>
     </Box>
   );

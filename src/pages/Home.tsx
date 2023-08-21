@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Text } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -23,7 +23,7 @@ interface dataEventName {
 function Home() {
   const navigate = useNavigate();
   const { userInfo } = UserContext();
-  const [name, setName] = useState("");
+  const [price, setPrice] = useState(0);
   const [val, setVal] = useState<string>("");
   const [eventName, setEventName] = useState<dataEventName[]>([
     { _id: "", nameEvent: "" },
@@ -36,6 +36,18 @@ function Home() {
       .get("http://localhost:3336/event")
       .then((res) => {
         setLoading(false);
+        let smallerPrice: any = res.data[6].descEvent.reduce(
+          (min: any, currentNumber: any) => {
+            if (parseFloat(currentNumber.price) < parseFloat(min.price)) {
+              return currentNumber.price;
+            }
+            return min;
+          },
+          res.data[0].descEvent[0]
+        );
+        console.log(
+          Math.min(...res.data[6].descEvent.map((e: any) => e.price))
+        );
         setEventName(res.data);
       })
       .catch((err) => {
@@ -58,10 +70,6 @@ function Home() {
       .delete("http://localhost:3336/event")
       .catch((err) => console.log(err));
   }, []);
-
-  useEffect(() => {
-    setName(userInfo.username);
-  }, [userInfo]);
 
   //if user click back after logIn
   useEffect(() => {
@@ -89,22 +97,15 @@ function Home() {
   };
 
   return (
-    <Box backgroundColor={"#12132c"} h={"full"}>
+    <Box backgroundColor={"currentcolor"} h={"full"}>
       <HomeHead
         eventName={eventName}
         handlerChange={(e: any) => setVal(e.target.value)}
         events={events}
       />
-      {/* <Box
-        position={"relative"}
-        bottom={"150px"}
-        right={"150px"}
-        display={"flex"}
-        justifyContent={"center"}
-        marginTop={"20px"}
-        marginRight={"40px"}
-        className="headBox"
-      ></Box> */}
+      {userInfo.isAdmin ? (
+        <Button onClick={() => navigate("/pageadmin")}>Confirm Ticket</Button>
+      ) : null}
       {loading ? (
         <LoadingEvent />
       ) : (
@@ -113,12 +114,15 @@ function Home() {
             // console.log(event.descEvent);
             return (
               <figure key={event._id}>
-                <img src={event.image} alt="Mountains" />
+                <img src={event.image} alt="Events" loading="lazy" />
                 <figcaption>
                   <div className="event-info">
                     <h1>{event.nameEvent}</h1>
                     <h3>{event.date}</h3>
-                    <h3>تبدأ أسعار التذاكر من {event.descEvent[0].price}</h3>
+                    <h3>
+                      تبدأ أسعار التذاكر من
+                      {Math.min(...event.descEvent.map((e: any) => e.price))}
+                    </h3>
                     <h3> {event.placeEvent} :الموقع </h3>
                     <HStack justify={"center"} spacing={"12"}>
                       <Link to={`/ticketspage/${event._id}`}>

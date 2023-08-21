@@ -24,34 +24,37 @@ import UserProvider from "./components/ContextUser";
 import PageUser from "./pages/PageUser";
 import PayPage from "./pages/PayPage";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import PageAdmin from "./pages/PageAdmin";
 
 export const App = () => {
-  const initialOptions = {
-    clientId: process.env.CLIENT_ID as string,
-    currency: "USD",
-    intent: "capture",
-  };
+  // const initialOptions = {
+  //   clientId:
+  //     "Acfk8mbJKeBqJPM6vTgegcDfDVHwCvCy3QoWixHiLSqubpWXh-iDG565kmgnDlTD2GLqZU66_1Hj0eo-",
+  //   currency: "USD",
+  //   intent: "capture",
+  // };
   return (
     <ChakraProvider theme={theme}>
       <UserProvider>
-        <PayPalScriptProvider options={initialOptions}>
-          <BrowserRouter>
-            <NavBar />
-            <Routes>
-              <Route element={<Background />}>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/forgetpass" element={<ForgetPass />} />
-                <Route path="/user/editpass/:id/:token" element={<EditPaa />} />
-              </Route>
-              <Route path="/" element={<Home />} />
-              <Route path="/ticketspage/:_id" element={<TicketsPage />} />
-              <Route path="/saleticket/:_id" element={<SaleTicket />} />
-              <Route path="/pageuser/:id" element={<PageUser />} />
-              <Route path="/paypage/:_id" element={<PayPage />} />
-            </Routes>
-          </BrowserRouter>
-        </PayPalScriptProvider>
+        {/* <PayPalScriptProvider options={initialOptions}> */}
+        <BrowserRouter>
+          <NavBar />
+          <Routes>
+            <Route element={<Background />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgetpass" element={<ForgetPass />} />
+              <Route path="/user/editpass/:id/:token" element={<EditPaa />} />
+            </Route>
+            <Route path="/" element={<Home />} />
+            <Route path="/ticketspage/:_id" element={<TicketsPage />} />
+            <Route path="/saleticket/:_id" element={<SaleTicket />} />
+            <Route path="/pageuser/:id" element={<PageUser />} />
+            <Route path="/paypage/:_id" element={<PayPage />} />
+            <Route path="/pageadmin" element={<PageAdmin />} />
+          </Routes>
+        </BrowserRouter>
+        {/* </PayPalScriptProvider> */}
       </UserProvider>
     </ChakraProvider>
   );

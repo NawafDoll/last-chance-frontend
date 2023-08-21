@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Divider,
   HStack,
   Heading,
@@ -14,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { UserContext } from "../components/ContextUser";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingTicket from "../components/LoadingTicket";
+import ConfirmDeleteTicket from "../components/ConfirmDeleteTicket";
 
 interface dataOrder {
   _id: string;
@@ -62,9 +64,10 @@ function PageUser() {
       });
   }, [id]);
 
-  useEffect(() => {
+  // useEffect(() => {
+  const fetchTicket = async () => {
     setLoading(true);
-    axios
+    return await axios
       .get(`http://localhost:3336/ticket/user/${id}`, {
         headers: {
           authorization: "Bearer " + localStorage.getItem("token"),
@@ -77,6 +80,7 @@ function PageUser() {
       .catch((err) => {
         setLoading(false);
         console.log(err);
+        localStorage.clear();
         toast({
           colorScheme: "pink",
           position: "top",
@@ -87,8 +91,24 @@ function PageUser() {
         });
         navigate("/login");
       });
-  }, [id]);
+  };
 
+  const handleDelete = async (id: any) => {
+    return await axios
+      .delete(`http://localhost:3336/ticket/delete/${id}`, {
+        headers: {
+          authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      })
+      .then((res) => {
+        fetchTicket();
+      })
+      .catch((err) => console.log(err));
+  };
+
+  useEffect(() => {
+    fetchTicket();
+  }, []);
   return (
     <Box
       backgroundColor={"#12132c"}
@@ -100,11 +120,23 @@ function PageUser() {
         {userInfo.username} أهلا بك{" "}
       </Heading>
       {order.length === 0 ? (
-        <Text color={"white"} textAlign={"center"} fontSize={"2xl"}>
+        <Text
+          color={"white"}
+          textAlign={"center"}
+          fontSize={"2xl"}
+          mt={"10px"}
+          mb={"10px"}
+        >
           لم تشتري اي تذكرة بعد
         </Text>
       ) : (
-        <Text color={"white"} textAlign={"center"} fontSize={"2xl"}>
+        <Text
+          color={"white"}
+          textAlign={"center"}
+          fontSize={"2xl"}
+          mt={"10px"}
+          mb={"10px"}
+        >
           التذاكر التي تم شراؤها
         </Text>
       )}
@@ -135,6 +167,8 @@ function PageUser() {
                 <Image
                   w={"80px"}
                   h={"80px"}
+                  loading="lazy"
+                  alt="picture"
                   src={`http://localhost:3336/${e.image}`}
                 />
               </VStack>
@@ -177,11 +211,23 @@ function PageUser() {
       )}
       <Divider />
       {ticket.length === 0 ? (
-        <Text color={"white"} textAlign={"center"} fontSize={"2xl"}>
+        <Text
+          mt={"10px"}
+          mb={"10px"}
+          color={"white"}
+          textAlign={"center"}
+          fontSize={"2xl"}
+        >
           ليس لديك تذاكر تم عرضها للبيع
         </Text>
       ) : (
-        <Text color={"white"} textAlign={"center"} fontSize={"2xl"}>
+        <Text
+          mt={"10px"}
+          mb={"10px"}
+          color={"white"}
+          textAlign={"center"}
+          fontSize={"2xl"}
+        >
           التذاكر التي تم عرضها للبيع
         </Text>
       )}
@@ -211,6 +257,8 @@ function PageUser() {
                   صورة التذكرة
                 </Text>
                 <Image
+                  loading="lazy"
+                  alt="picture"
                   w={"80px"}
                   h={"80px"}
                   src={`http://localhost:3336/${e.image}`}
@@ -261,7 +309,16 @@ function PageUser() {
                 {e.isSold ? (
                   <Text>تم بيع التذكرة</Text>
                 ) : (
-                  <Text>لم يتم بيع التذكرة</Text>
+                  <VStack>
+                    <Text>لم يتم بيع التذكرة</Text>
+                    {/* <Button
+                      colorScheme="blue"
+                      onClick={() => handleDelete(e._id)}
+                    >
+                      حذف التذكرة
+                    </Button> */}
+                    <ConfirmDeleteTicket id={e._id} funDelete={handleDelete} />
+                  </VStack>
                 )}
               </VStack>
             </SimpleGrid>
@@ -273,43 +330,3 @@ function PageUser() {
 }
 
 export default PageUser;
-
-{
-  /* <Box
-            w={"100%"}
-            display={"flex"}
-            justifyContent={"center"}
-            alignItems={"center"}
-          >
-            <VStack
-              key={e.id}
-              border={"1px solid white"}
-              w={"90%"}
-              mt={"10px"}
-              mb={"10px"}
-            >
-              <HStack justifyContent={"space-around"} w={"100%"}>
-                <Text color={"white"}>الصورة</Text>
-                <Text color={"white"}>الفئة</Text>
-                <Text color={"white"}>المقعد</Text>
-                <Text color={"white"}>السعر</Text>
-              </HStack>
-              <Divider />
-              <HStack
-                justifyContent={"space-around"}
-                w={"100%"}
-                textAlign={"center"}
-                pr={"30px"}
-              >
-                <Image w={"80px"} src={`http://localhost:3336/${e.image}`} />
-                <Text color={"white"} textAlign={"center"}>
-                  {e.category}
-                </Text>
-                <Text pr={"30px"} color={"white"}>
-                  {e.seat}
-                </Text>
-                <Text color={"white"}>{e.price}</Text>
-              </HStack>
-            </VStack>
-          </Box> */
-}

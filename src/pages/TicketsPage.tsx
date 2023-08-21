@@ -111,6 +111,7 @@ function TicketsPage() {
         duration: 3000,
         isClosable: true,
       });
+      localStorage.clear();
       return navigate("/login");
     } else {
       navigate(`/paypage/${id}`);
@@ -135,12 +136,14 @@ function TicketsPage() {
         alignItems={"flex-start"}
       >
         <Box
-          width={"500px"}
+          width={{ base: "300px", md: "500px" }}
           borderColor={"gray"}
           borderRadius={"3xl"}
           m={"5px"}
         >
           <Image
+            loading="lazy"
+            alt="picture"
             src={infoEvent.imageSeats}
             borderRadius={"3xl"}
             w={"full"}
@@ -149,7 +152,7 @@ function TicketsPage() {
         </Box>
         <Box
           m={"5px"}
-          width={"500px"}
+          width={{ base: "300px", md: "500px" }}
           border={"1px"}
           borderColor={"gray"}
           borderTopLeftRadius={"3xl"}
@@ -157,6 +160,8 @@ function TicketsPage() {
         >
           <VStack>
             <Image
+              loading="lazy"
+              alt="picture"
               src={infoEvent.image}
               w={"full"}
               h={"300px"}

@@ -56,6 +56,8 @@ function SaleTicket() {
           m={"5px"}
         >
           <Image
+            loading="lazy"
+            alt="picture"
             src={infoEvent.imageSeats}
             borderRadius={"3xl"}
             w={"full"}
@@ -72,6 +74,8 @@ function SaleTicket() {
         >
           <VStack>
             <Image
+              loading="lazy"
+              alt="picture"
               src={infoEvent.image}
               w={"full"}
               h={"300px"}

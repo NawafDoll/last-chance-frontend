@@ -14,7 +14,12 @@ import {
   useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
-import { ViewIcon, ViewOffIcon, WarningTwoIcon } from "@chakra-ui/icons";
+import {
+  ViewIcon,
+  ViewOffIcon,
+  WarningIcon,
+  WarningTwoIcon,
+} from "@chakra-ui/icons";
 import { useState } from "react";
 import React from "react";
 import axios from "axios";
@@ -100,9 +105,28 @@ function Signup() {
           <Heading color={"white"} fontSize={"4xl"} textAlign={"center"}>
             ...أهلا بك
           </Heading>
-          <Text color={"red"} fontSize={"2xl"} fontWeight={"bold"}>
-            {err} {err !== "" ? <WarningTwoIcon /> : ""}
-          </Text>
+          {err ? (
+            <HStack
+              justifyContent={"space-around"}
+              bg={"red.300"}
+              w={"370px"}
+              spacing={5}
+              borderRadius={"2xl"}
+              p={"3px"}
+              border={"1px solid red"}
+            >
+              <Box>
+                <WarningIcon fontSize={"2xl"} color={"red"} />
+              </Box>
+              <Box>
+                <Text dir="rtl" fontSize={"2xl"} color={"black"}>
+                  {err}
+                </Text>
+              </Box>
+            </HStack>
+          ) : (
+            ""
+          )}
         </Stack>
         <Box
           rounded={"lg"}

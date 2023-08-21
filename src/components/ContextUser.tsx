@@ -7,6 +7,7 @@ interface UserInfo {
   id: string;
   username: string;
   email: string;
+  isAdmin?: boolean;
 }
 const CreateUser = createContext<any>({ userInfo: {} });
 
@@ -15,14 +16,16 @@ const UserProvider = ({ children }: any) => {
     id: "",
     username: "",
     email: "",
+    isAdmin: false,
   });
 
   const tt: any = localStorage.getItem("token");
   useEffect(() => {
     try {
       const decodeToken: any = jwt<JwtPayload>(tt);
-      const { id, username, email } = decodeToken as UserInfo;
-      setUserInfo({ id, username, email });
+      const { id, username, email, isAdmin } = decodeToken as UserInfo;
+      setUserInfo({ id, username, email, isAdmin });
+
       //   console.log(userInfo);
     } catch (err) {
       console.log(err);

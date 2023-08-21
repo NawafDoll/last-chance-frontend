@@ -1,4 +1,4 @@
-import { WarningTwoIcon } from "@chakra-ui/icons";
+import { WarningIcon, WarningTwoIcon } from "@chakra-ui/icons";
 import {
   Box,
   Text,
@@ -17,6 +17,7 @@ import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import jsQR from "jsqr";
+import QRCodeReader from "jsqr";
 import "./home.css";
 import TicketConfirmation from "./TicketConfirmation";
 
@@ -30,7 +31,8 @@ function FormSaleTicket(props: any) {
   const [price, setPrice] = useState("");
   const [image, setImage] = useState<any>();
   const [category, setCategory] = useState("");
-  const [isOpenm, setIsOpen] = useState(false);
+
+  const [loading, setLoading] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   //check if image content on QR
@@ -59,6 +61,12 @@ function FormSaleTicket(props: any) {
             jsQR(imageData.data, imageData.width, imageData.height)?.data ||
             null;
           setPcode(code);
+          const QRcode = QRCodeReader(
+            imageData.data,
+            canvas.width,
+            canvas.height
+          );
+          console.log(QRcode);
         };
       };
       reader.readAsDataURL(file);
@@ -75,8 +83,15 @@ function FormSaleTicket(props: any) {
       formData.append("category", category);
       formData.append("event_id", String(_id));
       formData.append(`image`, image);
-      if (!agree) return setErr("انت لم توافق على الشروط");
-      if (pcode === null) return setErr("الرجاء التأكد من الصورة المدخلة");
+      setLoading(true);
+      if (!agree) {
+        setLoading(false);
+        return setErr("انت لم توافق على الشرط");
+      }
+      if (pcode === null) {
+        setLoading(false);
+        return setErr("الرجاء التأكد من الصورة المدخلة");
+      }
       if (!localStorage.getItem("token")) return navigate("/login");
 
       axios
@@ -87,17 +102,18 @@ function FormSaleTicket(props: any) {
         })
         .then((res) => {
           setErr("");
-          setIsOpen(true);
           onOpen();
           setSeat("");
           setCategory("");
           setAgree(false);
+          setLoading(false);
           setTimeout(() => {
             onClose();
           }, 2500);
         })
         .catch((err) => {
           console.log(err);
+          setLoading(false);
           setErr(err.response.data.message);
         });
     },
@@ -114,6 +130,43 @@ function FormSaleTicket(props: any) {
     setPrice(props.infoEvent.descEvent[searchIndex].price);
   }, [category, props.infoEvent.descEvent]);
 
+  // const handleScan = () => {
+  //   if (image) {
+  //     const reader = new FileReader();
+  //     reader.onload = async (e: any) => {
+  //       // const image = new Image();
+  //       image.src = e.target.result;
+
+  //       image.onload = () => {
+  //         const canvas = document.createElement("canvas");
+  //         const context: any = canvas.getContext("2d");
+
+  //         canvas.width = image.width;
+  //         canvas.height = image.height;
+  //         context.drawImage(image, 0, 0, image.width, image.height);
+
+  //         const imageData = context.getImageData(
+  //           0,
+  //           0,
+  //           canvas.width,
+  //           canvas.height
+  //         );
+  //         const code = QRCodeReader(
+  //           imageData.data,
+  //           canvas.width,
+  //           canvas.height
+  //         );
+
+  //         if (code) {
+  //           console.log(code.data);
+  //         } else {
+  //           console.log("No QR code found");
+  //         }
+  //       };
+  //     };
+  //     reader.readAsDataURL(image);
+  //   }
+  // };
   return (
     <HStack
       backgroundColor={"transparent"}
@@ -139,7 +192,7 @@ function FormSaleTicket(props: any) {
             className="font"
           >
             أقر بأن التذاكر التي قمت بإضافتها لن يتم استخدامها او بيعها في مكان
-            أخر وسيقوم غرينتاهب بإرسال التذاكر مباشرة للمشتري عند دفع قيمتها دون
+            أخر وسيقوم موقعنا بإرسال التذاكر مباشرة للمشتري عند دفع قيمتها دون
             الحاجة لموافقة إضافية
           </Text>
           <Checkbox
@@ -152,22 +205,36 @@ function FormSaleTicket(props: any) {
         </HStack>
         <Text textAlign={"right"} fontSize={"1.4vw"} className="font">
           في حال لم يتم بيع التذكرة ورغبت باستخدامها اي وقت يمكنك الغاء تفعيل
-          التذكرة عن طريق صفحة لوحة تحكم البائع ومن ثم الذهاب الى تذاكري والضغط
-          على زر التعديل ومن ثم اخفائها من زر المشاهدة
+          التذكرة عن طريق الدخول الى صفحتي ومن ثم النقر على حذف التذكرة
         </Text>
       </VStack>
       <VStack w={"600px"} fontSize={"large"} backgroundColor={"transparent"}>
-        <Text
-          textAlign={"center"}
-          color={"red"}
-          fontSize={"2xl"}
-          fontWeight={"medium"}
-          mb={"10px"}
-        >
-          {err} {err !== "" ? <WarningTwoIcon /> : ""}
-        </Text>
+        {err ? (
+          <HStack
+            mt={"5px"}
+            justifyContent={"space-around"}
+            bg={"red.300"}
+            w={"290px"}
+            spacing={5}
+            borderRadius={"2xl"}
+            p={"3px"}
+            border={"1px solid red"}
+          >
+            <Box>
+              <WarningIcon fontSize={"2xl"} color={"red"} />
+            </Box>
+            <Box>
+              <Text dir="rtl" fontSize={"1xl"} color={"black"}>
+                {err}
+              </Text>
+            </Box>
+          </HStack>
+        ) : (
+          ""
+        )}
+
         <form onSubmit={postTicket} encType="multipart/form-data">
-          <VStack align={"right"} alignItems={"end"}>
+          <VStack align={"right"} alignItems={"end"} mt={"5px"}>
             <Select
               textAlign={"center"}
               marginLeft={"5px"}
@@ -224,6 +291,7 @@ function FormSaleTicket(props: any) {
               />
             </FormControl>
             <Button
+              isLoading={loading}
               type="submit"
               width={"full"}
               fontSize={"md"}

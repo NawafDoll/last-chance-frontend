@@ -13,9 +13,11 @@ import {
   useToast,
   InputRightElement,
   InputGroup,
+  VStack,
+  HStack,
 } from "@chakra-ui/react";
 import jwt, { JwtPayload } from "jwt-decode";
-import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import { ViewIcon, ViewOffIcon, WarningIcon } from "@chakra-ui/icons";
 import { WarningTwoIcon } from "@chakra-ui/icons";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -53,6 +55,7 @@ function Login() {
         localStorage.setItem("token", res.data.token);
         const data = await res.data;
         setLoading(false);
+
         const tt: any = localStorage.getItem("token");
         if (res.status >= 200 || res.status < 300) {
           navigate("/");
@@ -86,9 +89,38 @@ function Login() {
           <Heading fontSize={"4xl"} color={"white"}>
             تسجيل الدخول
           </Heading>
-          <Text color={"red"} fontSize={"2xl"} fontWeight={"bold"}>
-            {err} {err !== "" ? <WarningTwoIcon /> : ""}
-          </Text>
+          {err ? (
+            <HStack
+              justifyContent={"space-around"}
+              bg={"red.300"}
+              w={"270px"}
+              spacing={5}
+              borderRadius={"2xl"}
+              p={"3px"}
+              border={"1px solid red"}
+            >
+              <Box>
+                <WarningIcon fontSize={"2xl"} color={"red"} />
+              </Box>
+              <Box>
+                <Text dir="rtl" fontSize={"2xl"} color={"black"}>
+                  {err}
+                </Text>
+              </Box>
+            </HStack>
+          ) : (
+            ""
+          )}
+
+          {/* <Text
+            color={"black"}
+            fontSize={"2xl"}
+            fontWeight={"bold"}
+            bg={"red.400"}
+            w={"250px"}
+          >
+            {err} {err !== "" ? <WarningTwoIcon color={"red"} /> : ""}
+          </Text> */}
         </Stack>
         <Box
           backgroundColor={"whiteAlpha.100"}
