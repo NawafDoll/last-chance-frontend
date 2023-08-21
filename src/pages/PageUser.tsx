@@ -109,6 +109,7 @@ function PageUser() {
   useEffect(() => {
     fetchTicket();
   }, []);
+
   return (
     <Box
       backgroundColor={"#12132c"}

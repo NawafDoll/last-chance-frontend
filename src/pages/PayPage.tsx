@@ -135,16 +135,16 @@ function PayPage() {
       })
       .catch((err) => {
         console.log(err);
-        localStorage.clear();
-        toast({
-          colorScheme: "pink",
-          position: "top",
-          title: "يجب عليك اعادة تسجيل الدخول ",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-        return navigate("/login");
+        // localStorage.clear();
+        // toast({
+        //   colorScheme: "pink",
+        //   position: "top",
+        //   title: "يجب عليك اعادة تسجيل الدخول ",
+        //   status: "error",
+        //   duration: 3000,
+        //   isClosable: true,
+        // });
+        // return navigate("/login");
       });
   };
 

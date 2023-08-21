@@ -23,7 +23,7 @@ interface dataEventName {
 function Home() {
   const navigate = useNavigate();
   const { userInfo } = UserContext();
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState();
   const [val, setVal] = useState<string>("");
   const [eventName, setEventName] = useState<dataEventName[]>([
     { _id: "", nameEvent: "" },
@@ -95,7 +95,11 @@ function Home() {
     }
     navigate(`/saleticket/${id}`);
   };
+  useEffect(() => {
+    setPrice(userInfo);
+  }, [userInfo]);
 
+  console.log(userInfo);
   return (
     <Box backgroundColor={"currentcolor"} h={"full"}>
       <HomeHead

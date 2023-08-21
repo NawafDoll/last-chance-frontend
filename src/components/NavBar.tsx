@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Flex,
@@ -94,9 +94,16 @@ function NavBar(props: any) {
         >
           <Text className="btn-22">التواصل</Text>
           <Text className="btn-22">من نحن</Text>
-          <Link to={`/pageuser/${userInfo.id}`}>
-            <Text className="btn-22">صفحتي</Text>
-          </Link>
+          {!localStorage.getItem("token") ? (
+            <Link to={"/login"}>
+              <Text className="btn-22">صفحتي</Text>
+            </Link>
+          ) : (
+            <Link to={`/pageuser/${userInfo.id}`}>
+              <Text className="btn-22">صفحتي</Text>
+            </Link>
+          )}
+
           <Link to={"/"}>
             <Text className="btn-22">الرئيسية</Text>
           </Link>
@@ -187,20 +194,36 @@ function NavBar(props: any) {
             </Text>
           </Link>
           <hr></hr>
-          <Link to={`/pageuser/${userInfo.id}`}>
-            <Text
-              pr={"5px"}
-              pt={"5px"}
-              pb={"5px"}
-              textAlign={"right"}
-              cursor={"pointer"}
-              // p={1.5}
-              fontWeight={"bold"}
-              _hover={{ backgroundColor: "gray.200" }}
-            >
-              صفحتي
-            </Text>
-          </Link>
+          {!localStorage.getItem("token") ? (
+            <Link to={`/login`}>
+              <Text
+                pr={"5px"}
+                pt={"5px"}
+                pb={"5px"}
+                textAlign={"right"}
+                cursor={"pointer"}
+                fontWeight={"bold"}
+                _hover={{ backgroundColor: "gray.200" }}
+              >
+                صفحتي
+              </Text>
+            </Link>
+          ) : (
+            <Link to={`/pageuser/${userInfo.id}`}>
+              <Text
+                pr={"5px"}
+                pt={"5px"}
+                pb={"5px"}
+                textAlign={"right"}
+                cursor={"pointer"}
+                // p={1.5}
+                fontWeight={"bold"}
+                _hover={{ backgroundColor: "gray.200" }}
+              >
+                صفحتي
+              </Text>
+            </Link>
+          )}
 
           <hr></hr>
           <Text

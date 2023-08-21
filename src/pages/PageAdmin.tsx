@@ -34,11 +34,7 @@ function PageAdmin() {
 
   const handleMatched = (id: any) => {
     return axios
-      .put(`http://localhost:3336/ticket/ismatched/admin/${id}`, {
-        headers: {
-          authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      })
+      .put(`http://localhost:3336/ticket/ismatched/admin/${id}`)
       .then((res) => {
         console.log(res);
       })
@@ -61,7 +57,7 @@ function PageAdmin() {
                 <Image
                   loading="lazy"
                   alt="picture"
-                  src={`http://localhost:3336/${ticket.image}`}
+                  // src={`http://localhost:3336/${ticket.image}`}
                   width={"400px"}
                   height={"300px"}
                 />
