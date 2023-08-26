@@ -135,16 +135,16 @@ function PayPage() {
       })
       .catch((err) => {
         console.log(err);
-        // localStorage.clear();
-        // toast({
-        //   colorScheme: "pink",
-        //   position: "top",
-        //   title: "يجب عليك اعادة تسجيل الدخول ",
-        //   status: "error",
-        //   duration: 3000,
-        //   isClosable: true,
-        // });
-        // return navigate("/login");
+        localStorage.clear();
+        toast({
+          colorScheme: "pink",
+          position: "top",
+          title: "يجب عليك اعادة تسجيل الدخول ",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return navigate("/login");
       });
   };
 
@@ -173,7 +173,6 @@ function PayPage() {
       body: JSON.stringify(data),
     })
       .then((res) => {
-        console.log(res.status);
         if (
           (res.status >= 400 && res.status < 500) ||
           infoTicket.isSold === true
@@ -182,8 +181,7 @@ function PayPage() {
             title: "نعتذر منك تم شراء التذكرة من قبل مستخدم اخر",
             status: "warning",
             duration: 3000,
-            position: "top",
-
+            position: "bottom",
             colorScheme: "pink",
             isClosable: true,
           });
@@ -221,14 +219,14 @@ function PayPage() {
 
         makePayment(paymentData)
           .then(async (res: any) => {
-            await axios.put(`http://localhost:3336/ticket/purchase/${_id}`);
+            console.log(res.status);
             setLoading(false);
-
             if (res.err) {
               console.log(res);
               setLoading(false);
               setValues({ ...values, error: res.err });
             } else if (res.success) {
+              await axios.put(`http://localhost:3336/ticket/purchase/${_id}`);
               setValues({
                 ...values,
                 error: "",
@@ -239,6 +237,17 @@ function PayPage() {
               setTimeout(() => {
                 onClose();
               }, 5000);
+            } else {
+              console.log(res);
+              setLoading(false);
+              return toast({
+                title: "لم تتم عملية الشراء بسبب مشكلة ما",
+                status: "warning",
+                duration: 3000,
+                position: "bottom",
+                colorScheme: "pink",
+                isClosable: true,
+              });
             }
           })
           .catch((err) => {

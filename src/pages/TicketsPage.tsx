@@ -26,10 +26,6 @@ interface dataEvent {
   imageSeats: string;
 }
 
-interface dataTicket {
-  price: "";
-  seat: "";
-}
 function TicketsPage() {
   const { _id } = useParams();
   const navigate = useNavigate();
@@ -58,8 +54,6 @@ function TicketsPage() {
       })
       .catch((err) => console.log(err));
   }, [_id]);
-
-  // const updateDataTicket = useMemo(()=>{},[])
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -100,7 +94,6 @@ function TicketsPage() {
     }
   }, [_id]);
 
-  // console.log(infoTicket);
   const toPayPage = (id: any) => {
     if (!localStorage.getItem("token") || id === "") {
       toast({

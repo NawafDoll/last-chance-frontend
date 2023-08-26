@@ -1,14 +1,5 @@
 import * as React from "react";
-import {
-  ChakraProvider,
-  Box,
-  Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
-  theme,
-} from "@chakra-ui/react";
+import { ChakraProvider, theme } from "@chakra-ui/react";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Background from "./components/Background";
@@ -25,14 +16,10 @@ import PageUser from "./pages/PageUser";
 import PayPage from "./pages/PayPage";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import PageAdmin from "./pages/PageAdmin";
+import AddEvent from "./pages/AddEvent";
+import PageNotFound from "./pages/PageNotFound";
 
 export const App = () => {
-  // const initialOptions = {
-  //   clientId:
-  //     "Acfk8mbJKeBqJPM6vTgegcDfDVHwCvCy3QoWixHiLSqubpWXh-iDG565kmgnDlTD2GLqZU66_1Hj0eo-",
-  //   currency: "USD",
-  //   intent: "capture",
-  // };
   return (
     <ChakraProvider theme={theme}>
       <UserProvider>
@@ -51,7 +38,11 @@ export const App = () => {
             <Route path="/saleticket/:_id" element={<SaleTicket />} />
             <Route path="/pageuser/:id" element={<PageUser />} />
             <Route path="/paypage/:_id" element={<PayPage />} />
+            {/* admin Route*/}
             <Route path="/pageadmin" element={<PageAdmin />} />
+            <Route path="/addevent" element={<AddEvent />} />
+            {/* 404 page not found */}
+            <Route path="*" element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>
         {/* </PayPalScriptProvider> */}

@@ -130,43 +130,6 @@ function FormSaleTicket(props: any) {
     setPrice(props.infoEvent.descEvent[searchIndex].price);
   }, [category, props.infoEvent.descEvent]);
 
-  // const handleScan = () => {
-  //   if (image) {
-  //     const reader = new FileReader();
-  //     reader.onload = async (e: any) => {
-  //       // const image = new Image();
-  //       image.src = e.target.result;
-
-  //       image.onload = () => {
-  //         const canvas = document.createElement("canvas");
-  //         const context: any = canvas.getContext("2d");
-
-  //         canvas.width = image.width;
-  //         canvas.height = image.height;
-  //         context.drawImage(image, 0, 0, image.width, image.height);
-
-  //         const imageData = context.getImageData(
-  //           0,
-  //           0,
-  //           canvas.width,
-  //           canvas.height
-  //         );
-  //         const code = QRCodeReader(
-  //           imageData.data,
-  //           canvas.width,
-  //           canvas.height
-  //         );
-
-  //         if (code) {
-  //           console.log(code.data);
-  //         } else {
-  //           console.log("No QR code found");
-  //         }
-  //       };
-  //     };
-  //     reader.readAsDataURL(image);
-  //   }
-  // };
   return (
     <HStack
       backgroundColor={"transparent"}
@@ -267,7 +230,7 @@ function FormSaleTicket(props: any) {
                 value={price}
                 onChange={(e: any) => setPrice(e.target.value)}
               />
-              <Text w={"130px"}> :سعر التذكرة</Text>
+              <Text w={"150px"}> :سعر التذكرة</Text>
             </HStack>
 
             <FormControl isRequired>

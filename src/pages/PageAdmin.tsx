@@ -12,7 +12,6 @@ import React, { useEffect, useState } from "react";
 
 function PageAdmin() {
   const [tickets, setTickets] = useState<any[] | any>([]);
-  const [event, setEvent] = useState<any>();
   const fetchDataTicket = async () => {
     return await axios
       .get(`http://localhost:3336/ticket/all/admin`, {
@@ -21,7 +20,6 @@ function PageAdmin() {
         },
       })
       .then((res) => {
-        console.log(res.data[0]);
         setTickets(res.data);
       })
       .catch((err) => {
@@ -35,9 +33,7 @@ function PageAdmin() {
   const handleMatched = (id: any) => {
     return axios
       .put(`http://localhost:3336/ticket/ismatched/admin/${id}`)
-      .then((res) => {
-        console.log(res);
-      })
+      .then((res) => {})
       .catch((err) => {
         console.log(err);
       });
@@ -57,7 +53,7 @@ function PageAdmin() {
                 <Image
                   loading="lazy"
                   alt="picture"
-                  // src={`http://localhost:3336/${ticket.image}`}
+                  src={`http://localhost:3336/${ticket.image}`}
                   width={"400px"}
                   height={"300px"}
                 />
@@ -75,7 +71,7 @@ function PageAdmin() {
                 />
                 <Text>{ticket.event.placeEvent}</Text>
                 <Text>{ticket.event.nameEvent}</Text>
-                <Text>{ticket.price}</Text>
+                <Text>{ticket.event.date}</Text>
               </VStack>
             </HStack>
             <Button onClick={() => handleMatched(ticket._id)}>متطابقة</Button>

@@ -1,8 +1,6 @@
 import {
   Box,
-  Button,
   Divider,
-  HStack,
   Heading,
   Image,
   SimpleGrid,
@@ -64,7 +62,6 @@ function PageUser() {
       });
   }, [id]);
 
-  // useEffect(() => {
   const fetchTicket = async () => {
     setLoading(true);
     return await axios

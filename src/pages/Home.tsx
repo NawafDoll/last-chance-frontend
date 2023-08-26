@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Text, VStack } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -44,9 +44,6 @@ function Home() {
             return min;
           },
           res.data[0].descEvent[0]
-        );
-        console.log(
-          Math.min(...res.data[6].descEvent.map((e: any) => e.price))
         );
         setEventName(res.data);
       })
@@ -99,7 +96,6 @@ function Home() {
     setPrice(userInfo);
   }, [userInfo]);
 
-  console.log(userInfo);
   return (
     <Box backgroundColor={"currentcolor"} h={"full"}>
       <HomeHead
@@ -107,9 +103,14 @@ function Home() {
         handlerChange={(e: any) => setVal(e.target.value)}
         events={events}
       />
+
       {userInfo.isAdmin ? (
-        <Button onClick={() => navigate("/pageadmin")}>Confirm Ticket</Button>
+        <VStack>
+          <Button onClick={() => navigate("/pageadmin")}>فحص التذاكر</Button>
+          <Button onClick={() => navigate("/addevent")}>أضافة فعالية</Button>
+        </VStack>
       ) : null}
+
       {loading ? (
         <LoadingEvent />
       ) : (

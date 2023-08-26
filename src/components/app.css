@@ -5,6 +5,11 @@ body{
   /* font-family: 'Noto Sans Arabic', sans-serif; */
 
 }
+@font-face {
+  font-family: A;
+  src: url('../../public/fonts/Alexandria-Regular.ttf');
+}
+
 
 html, body, #root {
     min-height: 100vh;
@@ -12,7 +17,8 @@ html, body, #root {
     font-family: 'Noto Sans Arabic', sans-serif;
   }
   *{
-    font-family: 'Noto Sans Arabic', sans-serif;
+    font-family: A;
+    /* font-family: 'Noto Sans Arabic', sans-serif; */
   }
 .productName{
     margin-top: 10px;

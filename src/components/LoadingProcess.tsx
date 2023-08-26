@@ -48,7 +48,7 @@ function LoadingProcess({ boo, onClose }: any) {
               fontWeight={"bold"}
             >
               {" "}
-              ...جاري تنفيذ الدفع
+              ...جاري تنفيذ عملية الدفع
             </Text>
           </ModalBody>
         </ModalContent>

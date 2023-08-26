@@ -20,6 +20,7 @@ function HomeHead({ eventName, handlerChange, events }: any) {
       display={"flex"}
       justifyContent={"space-between"}
     >
+      <span style={{ background: "white" }}></span>
       <VStack
         className="headBox"
         textAlign={"center"}
